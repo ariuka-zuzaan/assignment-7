@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import Posts from "./Posts";
 import PostDetail from "./PostDetail";
 import axios from "axios";
-import PostAdd from "./CustomForm";
 import CustomForm from "./CustomForm";
+import DetailContext from "./detailProvider";
 
 const Dashboard = () => {
   const [postList, setPostList] = useState([]);
@@ -13,9 +13,10 @@ const Dashboard = () => {
   const [changed, setChanged] = useState(false);
   const [isNew, setIsNew] = useState(false);
   const [actions, setActions] = useState({ name: "", id: null });
+  const [selectedId, setSelectedId] = useState(null);
 
-  const showDetailDashboard = (item) => {
-    setPostDetail(item);
+  const showDetailDashboard = (id) => {
+    setSelectedId(id);
   };
 
   const fetchData = () => {
@@ -49,34 +50,36 @@ const Dashboard = () => {
   }, [changedTitle]);
 
   return (
-    <div className="dashboard-container">
-      <button onClick={() => setIsNew(true)} style={{ marginBottom: "20px" }}>
-        + Post
-      </button>
-      <Posts title={changedTitle} showDetailPosts={showDetailDashboard} posts={postList} />
-      <input
-        name="title"
-        type="text"
-        value={title}
-        onChange={(event) => {
-          setTitle(event.target.value);
-        }}
-      />
-      <button onClick={() => setChangedTitle(title)} style={{ marginLeft: "10px" }}>
-        Change name
-      </button>
-      {postDetail && <PostDetail detail={postDetail} changeAction={changeAction}></PostDetail>}
-      {isNew || actions.name === "edit" ? (
-        <CustomForm
-          isEdit={actions.name === "edit"}
-          post={postList.filter((i) => i.id === actions.id)[0]}
-          changed={() => {
-            setChanged(!changed);
-          }}></CustomForm>
-      ) : (
-        <></>
-      )}
-    </div>
+    <DetailContext.provider value={selectedId}>
+      <div className="dashboard-container">
+        <button onClick={() => setIsNew(true)} style={{ marginBottom: "20px" }}>
+          + Post
+        </button>
+        <Posts title={changedTitle} showDetailPosts={showDetailDashboard} posts={postList} />
+        <input
+          name="title"
+          type="text"
+          value={title}
+          onChange={(event) => {
+            setTitle(event.target.value);
+          }}
+        />
+        <button onClick={() => setChangedTitle(title)} style={{ marginLeft: "10px" }}>
+          Change name
+        </button>
+        {postDetail && <PostDetail detail={postDetail} changeAction={changeAction}></PostDetail>}
+        {isNew || actions.name === "edit" ? (
+          <CustomForm
+            isEdit={actions.name === "edit"}
+            post={postList.filter((i) => i.id === actions.id)[0]}
+            changed={() => {
+              setChanged(!changed);
+            }}></CustomForm>
+        ) : (
+          <></>
+        )}
+      </div>
+    </DetailContext.provider>
   );
 };
 export default Dashboard;
